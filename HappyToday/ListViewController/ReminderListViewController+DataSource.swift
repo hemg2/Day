@@ -29,6 +29,9 @@ extension ReminderListViewController {
         cell.backgroundConfiguration = backgroundConfiguration
     }
     
+    func completeReminder(with id: Reminder.ID) {
+    }
+    
     private func doneButtonConfiguration(for reminder: Reminder) -> UICellAccessory.CustomViewConfiguration {
         let symbolName = reminder.isComplete ? "circle.fill" : "circle"
         let symbolConfiguration = UIImage.SymbolConfiguration(textStyle: .title1)
@@ -36,6 +39,16 @@ extension ReminderListViewController {
         let button = UIButton()
         button.setImage(image, for: .normal)
         return UICellAccessory.CustomViewConfiguration(customView: button, placement: .leading(displayed: .always))
+    }
+    
+    func reminder(for id: Reminder.ID) -> Reminder {
+        let index = reminders.indexOfReminder(with: id)
+        return reminders[index]
+    }
+    
+    func update(_ reminder: Reminder, with id: Reminder.ID) {
+        let index = reminders.indexOfReminder(with: id)
+        reminders[index] = reminder
     }
 }
 
