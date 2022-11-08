@@ -97,6 +97,7 @@ class ReminderViewController: UICollectionViewController {
             fatalError("Unable to find matching section")
         }
         return section
+        
     }
     
     func text(for row: Row) -> String? {
