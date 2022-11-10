@@ -23,6 +23,11 @@ class ReminderListViewController: UICollectionViewController {
         dataSource = DataSource(collectionView: collectionView) { (collectionView: UICollectionView, indexPath: IndexPath, itemIdentifier: Reminder.ID) in
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: itemIdentifier)
         }
+        
+        let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(didPressAddButton(_:)))
+        addButton.accessibilityLabel = NSLocalizedString("Add reminder", comment: "Add button accessibility label")
+        navigationItem.rightBarButtonItem = addButton
+        
 
         updateSnapshot()
         collectionView.dataSource = dataSource
@@ -35,10 +40,13 @@ class ReminderListViewController: UICollectionViewController {
      }
     
     func showDetail(for id: Reminder.ID) {
-            let reminder = reminder(for: id)
-            let viewController = ReminderViewController(reminder: reminder)
-            navigationController?.pushViewController(viewController, animated: true)
+        let reminder = reminder(for: id)
+        let viewController = ReminderViewController(reminder: reminder) { [weak self] reminder in
+            self?.update(reminder, with: reminder.id)
+            self?.updateSnapshot(reloading: [reminder.id])
         }
+        navigationController?.pushViewController(viewController, animated: true)
+    }
     
     private func listLayout() -> UICollectionViewCompositionalLayout {
         var listConfiguration = UICollectionLayoutListConfiguration(appearance: .grouped)

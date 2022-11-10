@@ -125,9 +125,9 @@
 			isa = PBXGroup;
 			children = (
 				6379A8372917CF3800E1DB6E /* ReminderViewController.swift */,
+				6379A83E291A5A6800E1DB6E /* ReminderViewController+CellConfiguration.swift */,
 				6379A83A2917D03700E1DB6E /* ReminderViewController+Row.swift */,
 				6379A83C2917E88400E1DB6E /* ReminderViewController+Section.swift */,
-				6379A83E291A5A6800E1DB6E /* ReminderViewController+CellConfiguration.swift */,
 			);
 			path = DetailViewController;
 			sourceTree = "<group>";
