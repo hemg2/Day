@@ -19,6 +19,8 @@ extension ReminderListViewController {
         NSLocalizedString("Not completed", comment: "Reminder not completed value")
     }
     
+    private var reminderStore: ReminderStore { ReminderStore.shared }
+    
     func updateSnapshot(reloading idsThatChanged: [Reminder.ID] = []) {
         let ids = idsThatChanged.filter { id in filteredReminders.contains(where: { $0.id == id }) }
         var snapshot = Snapshot()
@@ -28,6 +30,7 @@ extension ReminderListViewController {
             snapshot.reloadItems(ids)
         }
         dataSource.apply(snapshot)
+        headerView?.progress = progress
     }
     
     func cellRegistrationHandler(cell: UICollectionViewListCell, indexPath: IndexPath, id: Reminder.ID) {
@@ -77,14 +80,53 @@ extension ReminderListViewController {
     }
     
     
-    func add(_ reminder: Reminder) {
-            reminders.append(reminder)
+    func prepareReminderStore() {
+        Task {
+            do {
+                try await reminderStore.requestAccess()
+                reminders = try await reminderStore.readAll()
+                NotificationCenter.default.addObserver(self, selector: #selector(eventStoreChanged(_:)), name: .EKEventStoreChanged, object: nil)
+            } catch TodayError.accessDenied, TodayError.accessRestricted {
+#if DEBUG
+                reminders = Reminder.sampleData
+#endif
+            } catch {
+                showError(error)
+            }
+            updateSnapshot()
         }
-        
+    }
+    
+    func reminderStoreChanged() {
+            Task {
+                reminders = try await reminderStore.readAll()
+                updateSnapshot()
+            }
+        }
+    
+    
+    func add(_ reminder: Reminder) {
+        var reminder = reminder
+        do {
+            let idFromStore = try reminderStore.save(reminder)
+            reminder.id = idFromStore
+            reminders.append(reminder)
+        } catch TodayError.accessDenied {
+        } catch {
+            showError(error)
+        }
+    }
+    
     func deleteReminder(with id: Reminder.ID) {
+        do {
+            try reminderStore.remove(with: id)
             let index = reminders.indexOfReminder(with: id)
             reminders.remove(at: index)
+        } catch TodayError.accessDenied {
+        } catch {
+            showError(error)
         }
+    }
     
     func reminder(for id: Reminder.ID) -> Reminder {
         let index = reminders.indexOfReminder(with: id)
@@ -92,8 +134,14 @@ extension ReminderListViewController {
     }
     
     func update(_ reminder: Reminder, with id: Reminder.ID) {
-        let index = reminders.indexOfReminder(with: id)
-        reminders[index] = reminder
+        do {
+            try reminderStore.save(reminder) //미리 알림 저장
+            let index = reminders.indexOfReminder(with: id)
+            reminders[index] = reminder
+        } catch TodayError.accessDenied {
+        } catch {
+            showError(error)   // 앱을 껐다 켜도 진행도(채우는칸이 유지되어있다)
+        }
     }
 }
 
