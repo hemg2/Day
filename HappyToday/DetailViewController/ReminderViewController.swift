@@ -63,8 +63,6 @@ class ReminderViewController: UICollectionViewController {
         }
     }
     
-    
-    
     func cellRegistrationHandler(cell: UICollectionViewListCell, indexPath: IndexPath, row: Row) {
         let section = section(for: indexPath)
         switch (section, row) {

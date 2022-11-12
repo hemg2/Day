@@ -7,8 +7,6 @@
 
 import Foundation
 
-
-
 extension Date {
     
     var dayAndTimeText: String {
